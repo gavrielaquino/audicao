@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Audição GP Music</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Young+Serif&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#F3F4F7; --surface:#FFFFFF; --ink:#1B2140; --muted:#5D6480; --line:#D9DCE6;
+  --gold:#A8740F; --ok:#2E6F62; --no:#A63D52; --soft:#E9EBF2;
+  --serif:"Young Serif", Georgia, "Times New Roman", serif;
+  --sans:"Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#12152A; --surface:#1B1F38; --ink:#E9EAF2; --muted:#9DA2BD; --line:#2E3354;
+    --gold:#E0B04B; --ok:#6CC1AE; --no:#E68396; --soft:#242946;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#12152A; --surface:#1B1F38; --ink:#E9EAF2; --muted:#9DA2BD; --line:#2E3354;
+  --gold:#E0B04B; --ok:#6CC1AE; --no:#E68396; --soft:#242946;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;padding:20px 20px 60px}
+header.top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:20px}
+h1{font-family:var(--serif);font-weight:400;font-size:clamp(28px,4vw,40px);line-height:1.1;margin:0}
+h1 small{display:block;font-family:var(--sans);font-size:14px;color:var(--muted);margin-top:6px}
+.tabs{display:flex;gap:4px;background:var(--soft);padding:4px;border-radius:10px}
+.tabs button{border:0;background:transparent;padding:8px 16px;border-radius:7px;cursor:pointer;font-weight:500;color:var(--muted)}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 2px rgba(20,25,60,.12)}
+.layout{display:grid;grid-template-columns:300px 1fr;gap:24px;align-items:start}
+@media (max-width:820px){.layout{grid-template-columns:1fr}.layout.has-sel .list-pane{display:none}.layout:not(.has-sel) .form-pane{display:none}}
+@media (min-width:821px){.back{display:none!important}}
+.list-pane{position:sticky;top:12px}
+.btn{border:1px solid var(--line);background:var(--surface);padding:9px 14px;border-radius:8px;cursor:pointer;font-weight:500;display:inline-flex;align-items:center;gap:8px}
+.btn:hover{border-color:var(--muted)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.gold{background:var(--gold);color:#fff;border-color:var(--gold)}
+:root[data-theme="dark"] .btn.gold{color:#1B1F38}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn.gold{color:#1B1F38}}
+.btn:disabled{opacity:.55;cursor:default}
+.btn.danger{color:var(--no)}
+.btn.full{width:100%;justify-content:center}
+.cands{list-style:none;margin:12px 0 0;padding:0;display:flex;flex-direction:column;gap:2px}
+.cands button{width:100%;text-align:left;border:0;background:transparent;padding:10px 12px;border-radius:8px;cursor:pointer;display:grid;grid-template-columns:10px 1fr auto;gap:10px;align-items:center}
+.cands button:hover{background:var(--soft)}
+.cands button[aria-current="true"]{background:var(--surface);box-shadow:inset 3px 0 0 var(--gold)}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.dot.aprovado{background:var(--ok)} .dot.ressalvas{background:var(--gold)} .dot.nao{background:var(--no)}
+.cname{font-weight:600;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cmeta{font-size:13px;color:var(--muted)}
+.avg{font-family:var(--serif);font-size:18px}
+.avg.none{font-family:var(--sans);font-size:13px;color:var(--muted)}
+.group-label{font-size:13px;color:var(--muted);margin:16px 12px 4px;font-weight:600}
+.empty{color:var(--muted);padding:24px 12px;font-size:15px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:24px}
+@media (max-width:560px){.card{padding:18px}.wrap{padding:14px 14px 48px}}
+.form-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:8px;flex-wrap:wrap}
+.status{font-size:13px;color:var(--muted)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px}
+@media (max-width:560px){.grid2{grid-template-columns:1fr}}
+label.f{display:flex;flex-direction:column;gap:5px;font-size:14px;font-weight:500}
+label.f span.hint{font-weight:400;color:var(--muted);font-size:13px}
+input[type=text],input[type=tel],input[type=date],select,textarea{border:1px solid var(--line);background:var(--bg);border-radius:8px;padding:9px 11px;width:100%}
+textarea{min-height:84px;resize:vertical;line-height:1.5}
+input.name{font-family:var(--serif);font-size:26px;border:0;border-bottom:1px solid var(--line);border-radius:0;background:transparent;padding:4px 0}
+h2{font-family:var(--serif);font-weight:400;font-size:22px;margin:28px 0 4px}
+h2 + p.sub{margin:0 0 12px;color:var(--muted);font-size:14px}
+.crit{display:grid;grid-template-columns:1fr auto 130px;align-items:center;gap:12px;padding:8px 0;border-bottom:1px solid var(--line)}
+.crit:last-child{border-bottom:0}
+@media (max-width:560px){.crit{grid-template-columns:1fr auto}.crit .lbl{grid-column:1/-1;order:3;font-size:13px;color:var(--muted)}}
+.crit .name{font-weight:500}
+.crit .lbl{font-size:14px;color:var(--muted)}
+/* pentagrama: a escala sobe conforme a nota */
+.staff{position:relative;width:176px;height:46px;display:flex;align-items:stretch;gap:0;border:0;padding:0;margin:0;
+  background:repeating-linear-gradient(to bottom,transparent 0 7px,var(--line) 7px 8px);background-size:100% 40px;background-position:0 3px;background-repeat:no-repeat}
+.staff legend{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.staff label{flex:1;position:relative;cursor:pointer}
+.staff input{position:absolute;opacity:0;inset:0;margin:0;cursor:pointer}
+.staff .head{position:absolute;left:50%;width:15px;height:11px;margin-left:-7.5px;border-radius:50%;border:2px solid var(--muted);transform:rotate(-22deg);background:var(--surface);transition:background .15s,border-color .15s}
+.staff label:nth-child(2) .head{bottom:3px}
+.staff label:nth-child(3) .head{bottom:11px}
+.staff label:nth-child(4) .head{bottom:19px}
+.staff label:nth-child(5) .head{bottom:27px}
+.staff label:nth-child(6) .head{bottom:35px}
+.staff label:hover .head{border-color:var(--ink)}
+.staff input:checked + .head{background:var(--gold);border-color:var(--gold)}
+.staff input:focus-visible + .head{outline:2px solid var(--gold);outline-offset:3px}
+.clear{border:0;background:none;color:var(--muted);cursor:pointer;font-size:13px;padding:4px}
+.seg{display:flex;flex-wrap:wrap;gap:8px}
+.seg label{border:1px solid var(--line);border-radius:999px;padding:7px 14px;cursor:pointer;font-size:14px;font-weight:500;display:flex;gap:8px;align-items:center}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg label:has(input:checked){border-color:var(--ink);background:var(--soft)}
+.seg label:has(input:focus-visible){outline:2px solid var(--gold);outline-offset:2px}
+.suggest{font-size:14px;color:var(--muted);margin:8px 0 0}
+.score-big{display:flex;align-items:baseline;gap:10px}
+.score-big b{font-family:var(--serif);font-weight:400;font-size:38px;line-height:1}
+.score-big span{color:var(--muted);font-size:14px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.feedback-box textarea{min-height:220px;background:var(--bg)}
+.foot{display:flex;justify-content:space-between;gap:12px;margin-top:32px;padding-top:16px;border-top:1px solid var(--line);flex-wrap:wrap}
+/* relatório */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:8px 0 8px}
+.stat{border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--bg)}
+.stat b{font-family:var(--serif);font-weight:400;font-size:30px;display:block;line-height:1.1}
+.stat span{font-size:14px;color:var(--muted)}
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;min-width:520px;font-size:15px}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:13px;color:var(--muted);font-weight:600}
+td.num{font-family:var(--serif);font-size:17px}
+.pill{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;white-space:nowrap}
+.bars{display:flex;flex-direction:column;gap:8px}
+.bar{display:grid;grid-template-columns:210px 1fr 40px;gap:10px;align-items:center;font-size:14px}
+@media (max-width:560px){.bar{grid-template-columns:130px 1fr 36px;font-size:13px}}
+.bar .track{height:8px;background:var(--soft);border-radius:4px;overflow:hidden}
+.bar .fill{height:100%;background:var(--ink);border-radius:4px}
+.bar .fill.low{background:var(--no)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:8px;font-size:14px;max-width:90vw;z-index:10;display:none}
+.loading{padding:60px 0;text-align:center;color:var(--muted)}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+/* --- acréscimos da versão com login --- */
+.topright{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.audsel{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.audsel select{width:auto;max-width:100%;padding:6px 10px;font-size:14px}
+.audsel .btn{padding:6px 12px;font-size:14px}
+.acct{position:relative}
+.acct-menu{position:absolute;right:0;top:calc(100% + 6px);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px;min-width:220px;box-shadow:0 8px 24px rgba(20,25,60,.14);z-index:5;display:none}
+.acct-menu.open{display:block}
+.acct-menu .who{font-size:13px;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line);margin-bottom:4px;word-break:break-all}
+.acct-menu button{display:block;width:100%;text-align:left;border:0;background:none;padding:9px 10px;border-radius:6px;cursor:pointer}
+.acct-menu button:hover{background:var(--soft)}
+.login{max-width:400px;margin:8vh auto 0}
+.login h1{margin-bottom:6px}
+.login p.lead{color:var(--muted);margin:0 0 24px}
+.login form{display:flex;flex-direction:column;gap:14px}
+.login .err{color:var(--no);font-size:14px;min-height:20px;margin:0}
+dialog{border:1px solid var(--line);border-radius:14px;background:var(--surface);color:var(--ink);padding:24px;max-width:380px;width:calc(100% - 32px)}
+dialog::backdrop{background:rgba(10,12,30,.45)}
+dialog h2{margin-top:0}
+dialog form{display:flex;flex-direction:column;gap:14px}
+dialog .row{display:flex;gap:8px;justify-content:flex-end}
+.conn{font-size:13px;color:var(--muted)}
+.conn.off{color:var(--no)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top" id="top" hidden>
+    <div>
+      <h1>Audição GP Music</h1>
+      <div class="audsel">
+        <label for="aud" class="conn">Audição</label>
+        <select id="aud"></select>
+        <button class="btn" id="nova-aud">Nova audição</button>
+      </div>
+    </div>
+    <div class="topright">
+      <nav class="tabs" role="tablist">
+        <button role="tab" id="tab-cand" aria-selected="true">Candidatos</button>
+        <button role="tab" id="tab-rel" aria-selected="false">Relatório</button>
+      </nav>
+      <div class="acct">
+        <button class="btn" id="acct-btn" aria-haspopup="true" aria-expanded="false">Conta</button>
+        <div class="acct-menu" id="acct-menu">
+          <div class="who" id="acct-who"></div>
+          <button id="chg-pass">Trocar senha</button>
+          <button id="logout">Sair</button>
+        </div>
+      </div>
+    </div>
+  </header>
+  <main id="app"><div class="loading">Carregando…</div></main>
+</div>
+
+<dialog id="dlg-pass">
+  <form id="form-pass">
+    <h2>Trocar senha</h2>
+    <label class="f">Nova senha<input type="password" id="np1" minlength="8" autocomplete="new-password" required></label>
+    <label class="f">Repita a nova senha<input type="password" id="np2" minlength="8" autocomplete="new-password" required></label>
+    <p class="err" id="pass-err" style="color:var(--no);font-size:14px;margin:0"></p>
+    <div class="row"><button type="button" class="btn" id="pass-cancel">Cancelar</button><button class="btn primary" type="submit">Salvar</button></div>
+  </form>
+</dialog>
+
+<dialog id="dlg-aud">
+  <form id="form-aud">
+    <h2>Nova audição</h2>
+    <label class="f">Nome da audição<input type="text" id="aud-nome" required placeholder="Ex.: Audição GP Music · março 2027"></label>
+    <div class="row"><button type="button" class="btn" id="aud-cancel">Cancelar</button><button class="btn primary" type="submit">Criar</button></div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+"use strict";
+
+const SUPABASE_URL = "https://djxilypephoyhmjlrqrn.supabase.co";
+const SUPABASE_KEY = "sb_publishable_qqZ4m6bOFwvTrtm9aHDRtw_WqwUGDda";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+const SCALE = {1:"Insuficiente",2:"Em desenvolvimento",3:"Adequado",4:"Bom",5:"Excelente"};
+const CRIT = {
+  voz: [
+    ["afinacao","Afinação"],["ritmo","Ritmo e tempo"],["linguagem","Linguagem musical"],
+    ["respiracao","Respiração e apoio"],["extensao","Extensão e projeção"],
+    ["interpretacao","Dinâmica e interpretação"],["harmonia","Percepção e segunda voz"],
+    ["postura","Postura ministerial"]
+  ],
+  instrumento: [
+    ["tecnica","Técnica no instrumento"],["ritmo","Ritmo e tempo"],["harmonia","Conhecimento harmônico"],
+    ["linguagem","Linguagem musical"],["ouvido","Percepção e tocar de ouvido"],
+    ["acompanhamento","Dinâmica e acompanhamento"],["postura","Postura ministerial"]
+  ]
+};
+const FUNCOES = {voz:"Voz",instrumento:"Instrumento",ambos:"Voz e instrumento"};
+const RESULT = {
+  pendente:{t:"Pendente",c:""},
+  aprovado:{t:"Aprovado",c:"aprovado"},
+  ressalvas:{t:"Em observação e treinamento",c:"ressalvas"},
+  nao:{t:"Não aprovado",c:"nao"}
+};
+const LS_AUD = "gpmusic-audicao-atual";
+
+const state = { user:null, auds:[], aid:null, cfg:{}, cands:new Map(), sel:null, view:"cand", channel:null };
+const timers={}, inflight={}, dirty={}, lastEdit={};
+let cfgTimer=null, cfgInflight=false, cfgDirty=false, cfgLastEdit=0;
+
+const $ = (s,r=document)=>r.querySelector(s);
+const esc = s => String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const clone = o => JSON.parse(JSON.stringify(o));
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.style.display="block"; clearTimeout(toast._t); toast._t=setTimeout(()=>t.style.display="none",3600); }
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function lsSet(k,v){ try{ localStorage.setItem(k,v); }catch(e){} }
+
+/* ---------- cálculo ---------- */
+function groupsOf(c){ return c.funcao==="ambos" ? ["voz","instrumento"] : [c.funcao||"voz"]; }
+function avgOf(c){
+  const vals=[]; for(const g of groupsOf(c)){ const n=(c.notas||{})[g]||{}; for(const [k] of CRIT[g]) if(n[k]) vals.push(n[k]); }
+  return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+}
+function countFilled(c){ let f=0,t=0; for(const g of groupsOf(c)){ const n=(c.notas||{})[g]||{}; for(const [k] of CRIT[g]){ t++; if(n[k]) f++; } } return {f,t}; }
+function suggestion(a){ if(a==null) return null; return a>=4?"aprovado":a>=3?"ressalvas":"nao"; }
+const fmt = a => a==null ? "—" : a.toFixed(1).replace(".",",");
+function firstName(n){ return (n||"").trim().split(/\s+/)[0]||""; }
+const rowToCand = r => ({...clone(r.dados||{}), id:r.id, aid:r.audicao_id});
+
+/* ---------- login ---------- */
+function showLogin(msg){
+  $("#top").hidden=true;
+  $("#app").innerHTML=`<div class="login card">
+    <h1>Audição GP Music</h1>
+    <p class="lead">Entre com o e-mail e a senha cadastrados pela coordenação.</p>
+    <form id="login-form">
+      <label class="f">E-mail<input type="email" id="lg-email" autocomplete="username" required></label>
+      <label class="f">Senha<input type="password" id="lg-pass" autocomplete="current-password" required></label>
+      <p class="err" id="lg-err">${esc(msg||"")}</p>
+      <button class="btn primary full" type="submit" id="lg-btn">Entrar</button>
+    </form></div>`;
+  $("#lg-email").focus();
+  $("#login-form").onsubmit=async e=>{
+    e.preventDefault();
+    const b=$("#lg-btn"); b.disabled=true; b.textContent="Entrando…"; $("#lg-err").textContent="";
+    const {data,error}=await sb.auth.signInWithPassword({email:$("#lg-email").value.trim(),password:$("#lg-pass").value});
+    if(error){
+      b.disabled=false; b.textContent="Entrar";
+      $("#lg-err").textContent = /invalid/i.test(error.message) ? "E-mail ou senha incorretos." : "Não foi possível entrar agora. Verifique a internet e tente de novo.";
+      return;
+    }
+    afterLogin(data.user);
+  };
+}
+function showNoAccess(){
+  $("#top").hidden=true;
+  $("#app").innerHTML=`<div class="login card"><h1>Sem acesso</h1>
+    <p class="lead">Sua conta (${esc(state.user&&state.user.email)}) ainda não está liberada como coordenador do GP Music. Peça a liberação para quem administra o app.</p>
+    <button class="btn full" id="out2">Sair</button></div>`;
+  $("#out2").onclick=logout;
+}
+async function logout(){
+  if(state.channel){ sb.removeChannel(state.channel); state.channel=null; }
+  await sb.auth.signOut();
+  state.user=null; state.cands=new Map(); state.sel=null;
+  showLogin();
+}
+
+async function afterLogin(user){
+  state.user=user;
+  $("#app").innerHTML=`<div class="loading">Carregando avaliações…</div>`;
+  const {data:co,error:ce}=await sb.from("coordenadores").select("user_id").eq("user_id",user.id).maybeSingle();
+  if(ce){ $("#app").innerHTML=`<div class="card"><p>Não foi possível conectar ao banco de dados. Recarregue a página.</p></div>`; return; }
+  if(!co){ showNoAccess(); return; }
+  $("#acct-who").textContent=user.email;
+  $("#top").hidden=false;
+  await loadAuds();
+  if(!state.auds.length){
+    const {data,error}=await sb.from("audicoes").insert({titulo:"Audição GP Music"}).select().single();
+    if(!error) state.auds=[data];
+  }
+  const saved=lsGet(LS_AUD);
+  await selectAud(state.auds.some(a=>a.id===saved)?saved:(state.auds[0]&&state.auds[0].id));
+  subscribe();
+}
+
+/* ---------- audições ---------- */
+async function loadAuds(){
+  const {data,error}=await sb.from("audicoes").select("id,titulo,dados,criado_em").order("criado_em",{ascending:false});
+  if(error){ toast("Não foi possível carregar as audições."); return; }
+  state.auds=data||[];
+  renderAudSelect();
+}
+function renderAudSelect(){
+  $("#aud").innerHTML=state.auds.map(a=>`<option value="${esc(a.id)}" ${a.id===state.aid?"selected":""}>${esc(a.titulo)}</option>`).join("");
+}
+async function selectAud(id){
+  if(!id) return;
+  state.aid=id; lsSet(LS_AUD,id); state.sel=null;
+  const a=state.auds.find(x=>x.id===id);
+  state.cfg={...(a?clone(a.dados||{}):{}), titulo:a?a.titulo:""};
+  renderAudSelect();
+  await loadCands();
+}
+async function loadCands(){
+  const aid=state.aid;
+  const {data,error}=await sb.from("audicao_candidatos").select("id,audicao_id,dados").eq("audicao_id",aid);
+  if(error){ toast("Não foi possível carregar os candidatos."); return; }
+  if(aid!==state.aid) return;
+  const next=new Map();
+  for(const r of data||[]){ const local=state.cands.get(r.id); next.set(r.id, local&&isBusy(r.id)?local:rowToCand(r)); }
+  for(const [id,c] of state.cands) if(!next.has(id)&&inflight[id]&&c.aid===aid) next.set(id,c);
+  state.cands=next;
+  if(state.sel&&!next.has(state.sel)) state.sel=null;
+  safeRender();
+}
+$("#aud").onchange=e=>selectAud(e.target.value);
+$("#nova-aud").onclick=()=>{ $("#aud-nome").value=""; $("#dlg-aud").showModal(); $("#aud-nome").focus(); };
+$("#aud-cancel").onclick=()=>$("#dlg-aud").close();
+$("#form-aud").onsubmit=async e=>{
+  e.preventDefault();
+  const titulo=$("#aud-nome").value.trim(); if(!titulo) return;
+  const {data,error}=await sb.from("audicoes").insert({titulo,dados:{assinatura:state.cfg.assinatura||""}}).select().single();
+  if(error){ toast("Não foi possível criar a audição."); return; }
+  $("#dlg-aud").close();
+  state.auds=[data,...state.auds.filter(a=>a.id!==data.id)];
+  await selectAud(data.id); toast("Audição criada");
+};
+
+/* ---------- conta ---------- */
+$("#acct-btn").onclick=e=>{ e.stopPropagation(); const m=$("#acct-menu"); m.classList.toggle("open"); $("#acct-btn").setAttribute("aria-expanded",m.classList.contains("open")); };
+document.addEventListener("click",e=>{ if(!e.target.closest(".acct")) $("#acct-menu").classList.remove("open"); });
+$("#logout").onclick=logout;
+$("#chg-pass").onclick=()=>{ $("#acct-menu").classList.remove("open"); $("#np1").value=$("#np2").value=""; $("#pass-err").textContent=""; $("#dlg-pass").showModal(); $("#np1").focus(); };
+$("#pass-cancel").onclick=()=>$("#dlg-pass").close();
+$("#form-pass").onsubmit=async e=>{
+  e.preventDefault();
+  const a=$("#np1").value, b=$("#np2").value;
+  if(a!==b){ $("#pass-err").textContent="As senhas não conferem."; return; }
+  const {error}=await sb.auth.updateUser({password:a});
+  if(error){ $("#pass-err").textContent = /same|different/i.test(error.message)?"A nova senha precisa ser diferente da atual.":"Não foi possível trocar a senha. Use pelo menos 8 caracteres."; return; }
+  $("#dlg-pass").close(); toast("Senha alterada");
+};
+
+/* ---------- tempo real ---------- */
+function isBusy(id){ return Date.now()-(lastEdit[id]||0)<4000 || inflight[id] || !!timers[id]; }
+function subscribe(){
+  if(state.channel) sb.removeChannel(state.channel);
+  state.channel=sb.channel("audicao-gp")
+    .on("postgres_changes",{event:"*",schema:"public",table:"audicao_candidatos"},p=>{
+      if(p.eventType==="DELETE"){
+        const id=p.old&&p.old.id; if(!id||!state.cands.has(id)) return;
+        state.cands.delete(id); if(state.sel===id) state.sel=null; safeRender(); return;
+      }
+      const r=p.new; if(!r||r.audicao_id!==state.aid||isBusy(r.id)) return;
+      state.cands.set(r.id,rowToCand(r)); safeRender(r.id);
+    })
+    .on("postgres_changes",{event:"*",schema:"public",table:"audicoes"},async p=>{
+      await loadAuds();
+      if(p.eventType==="DELETE"&&p.old&&p.old.id===state.aid){ toast("Esta audição foi excluída."); await selectAud(state.auds[0]&&state.auds[0].id); return; }
+      const a=state.auds.find(x=>x.id===state.aid);
+      if(a&&Date.now()-cfgLastEdit>4000&&!cfgInflight){ state.cfg={...clone(a.dados||{}),titulo:a.titulo}; if(state.view==="rel") safeRender(); }
+    })
+    .subscribe();
+}
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&state.aid&&state.user) loadCands(); });
+
+function safeRender(changedId){
+  const ae=document.activeElement;
+  const typing=ae&&ae.matches&&ae.matches("input,textarea,select")&&ae.closest(".card");
+  if(state.view==="cand"){
+    if(typing&&(!changedId||changedId===state.sel)){
+      const lp=document.querySelector(".list-pane"); if(lp){ lp.innerHTML=renderList(); bindList(); }
+    } else render();
+  } else if(!typing) render();
+}
+
+/* ---------- salvar ---------- */
+function setStatus(t){ const s=$("#save-status"); if(s) s.textContent=t; }
+function scheduleSave(id){ lastEdit[id]=Date.now(); setStatus("Salvando…"); clearTimeout(timers[id]); timers[id]=setTimeout(()=>{ timers[id]=null; flush(id); },700); }
+async function flush(id){
+  if(inflight[id]){ dirty[id]=true; return; }
+  const c=state.cands.get(id); if(!c) return;
+  inflight[id]=true;
+  const {id:_i,aid,...dados}=c; dados.atualizadoEm=Date.now();
+  const {error}=await sb.from("audicao_candidatos").upsert({id,audicao_id:aid,dados});
+  if(error){ setStatus("Não salvo"); toast(error.code==="42501"?"Você não tem permissão para editar estas avaliações.":"Não foi possível salvar. Verifique a internet."); }
+  else setStatus("Salvo");
+  inflight[id]=false; lastEdit[id]=Date.now();
+  if(dirty[id]){ dirty[id]=false; flush(id); }
+}
+function scheduleCfg(){ cfgLastEdit=Date.now(); clearTimeout(cfgTimer); cfgTimer=setTimeout(flushCfg,700); }
+async function flushCfg(){
+  if(cfgInflight){ cfgDirty=true; return; }
+  cfgInflight=true;
+  const {titulo,...dados}=state.cfg;
+  const upd={dados}; if(titulo&&titulo.trim()) upd.titulo=titulo.trim();
+  const {error}=await sb.from("audicoes").update(upd).eq("id",state.aid);
+  if(error) toast("Não foi possível salvar os dados da audição.");
+  else { const a=state.auds.find(x=>x.id===state.aid); if(a){ a.dados=clone(dados); if(upd.titulo) a.titulo=upd.titulo; } renderAudSelect(); }
+  cfgInflight=false; cfgLastEdit=Date.now(); if(cfgDirty){ cfgDirty=false; flushCfg(); }
+}
+
+/* ---------- IA ---------- */
+async function gerarTexto(prompt){
+  const {data,error}=await sb.functions.invoke("gerar-texto",{body:{prompt}});
+  if(error){
+    let code="";
+    try{ const b=await error.context.json(); code=b&&b.error; }catch(_){}
+    const st=error.context&&error.context.status;
+    const e=new Error(code||"falha"); e.code = st===404||error.name==="FunctionsFetchError"||code==="sem_chave" ? "nao_configurado" : code; throw e;
+  }
+  if(!data||!data.text) throw new Error("vazio");
+  return data.text;
+}
+function iaErro(e){
+  return ({nao_configurado:"A geração automática ainda não foi configurada. Você pode escrever o texto à mão.",
+    nao_autorizado:"Sua conta não tem permissão para gerar textos.",
+    limite:"Muitos pedidos seguidos. Aguarde um pouco e tente de novo."})[e&&e.code] || "Não foi possível gerar agora. Tente de novo em instantes.";
+}
+
+/* ---------- navegação ---------- */
+function setView(v){
+  state.view=v;
+  $("#tab-cand").setAttribute("aria-selected",v==="cand");
+  $("#tab-rel").setAttribute("aria-selected",v==="rel");
+  render();
+}
+$("#tab-cand").onclick=()=>setView("cand");
+$("#tab-rel").onclick=()=>setView("rel");
+
+function sorted(){ return [...state.cands.values()].sort((a,b)=>(a.criadoEm||0)-(b.criadoEm||0)); }
+
+function render(){
+  if(!state.user||!state.aid) return;
+  const app=$("#app");
+  if(state.view==="rel"){ app.innerHTML=renderReport(); bindReport(); return; }
+  const c=state.sel&&state.cands.get(state.sel);
+  app.innerHTML=`<div class="layout ${c?"has-sel":""}">
+    <aside class="list-pane" aria-label="Candidatos">${renderList()}</aside>
+    <section class="form-pane">${c?renderForm(c):renderNoSel()}</section>
+  </div>`;
+  bindList(); if(c) bindForm();
+}
+
+function renderList(){
+  const all=sorted();
+  let html=`<button class="btn primary full" id="add">Adicionar candidato</button>`;
+  if(!all.length) return html+`<p class="empty">Nenhum candidato nesta audição. Adicione o primeiro para começar.</p>`;
+  for(const g of ["voz","instrumento","ambos"]){
+    const list=all.filter(c=>(c.funcao||"voz")===g); if(!list.length) continue;
+    html+=`<p class="group-label">${FUNCOES[g]} · ${list.length}</p><ul class="cands">`;
+    for(const c of list){
+      const a=avgOf(c), r=RESULT[c.resultado||"pendente"];
+      html+=`<li><button data-id="${esc(c.id)}" aria-current="${c.id===state.sel}">
+        <span class="dot ${r.c}" title="${esc(r.t)}"></span>
+        <span><span class="cname">${esc(c.nome||"Sem nome")}</span><span class="cmeta">${esc(g==="voz"?FUNCOES[g]:(c.detalhe||FUNCOES[g]))}</span></span>
+        <span class="avg ${a==null?"none":""}">${a==null?"—":fmt(a)}</span></button></li>`;
+    }
+    html+=`</ul>`;
+  }
+  return html;
+}
+function renderNoSel(){
+  return `<div class="card"><h2 style="margin-top:0">Como funciona</h2>
+  <p>Adicione cada candidato, preencha a ficha durante ou logo após a apresentação e marque as notas no pentagrama: quanto mais alta a nota na pauta, melhor o desempenho (de 1 a 5).</p>
+  <p>Tudo o que você preenche aparece na hora para os outros coordenadores. Com as notas e observações prontas, gere o feedback individual para enviar pelo WhatsApp. A aba Relatório consolida a audição para a liderança.</p></div>`;
+}
+function bindList(){
+  $("#add").onclick=addCand;
+  document.querySelectorAll(".cands button").forEach(b=>b.onclick=()=>{ state.sel=b.dataset.id; render(); window.scrollTo({top:0}); });
+}
+function addCand(){
+  const id=crypto.randomUUID();
+  const c={id,aid:state.aid,nome:"",funcao:"voz",detalhe:"",telefone:"",musica:"",notas:{voz:{},instrumento:{}},observacoes:"",fortes:"",desenvolver:"",resultado:"pendente",feedback:"",criadoEm:Date.now()};
+  state.cands.set(id,c); state.sel=id; render(); flush(id);
+  setTimeout(()=>{ const n=$("#f-nome"); n&&n.focus(); },30);
+}
+
+/* ---------- ficha ---------- */
+function staff(g,k,val){
+  let h=`<fieldset class="staff"><legend>Nota</legend>`;
+  for(let v=1;v<=5;v++) h+=`<label title="${v} · ${SCALE[v]}"><input type="radio" name="${g}-${k}" value="${v}" data-g="${g}" data-k="${k}" ${val===v?"checked":""} aria-label="${v} – ${SCALE[v]}"><span class="head"></span></label>`;
+  return h+`</fieldset>`;
+}
+function waLink(c){
+  const phone=(c.telefone||"").replace(/\D/g,"");
+  return phone&&c.feedback ? `https://wa.me/${phone.length<=11?"55"+phone:phone}?text=${encodeURIComponent(c.feedback)}` : "";
+}
+function renderForm(c){
+  const a=avgOf(c), sug=suggestion(a), cf=countFilled(c);
+  let crits="";
+  for(const g of groupsOf(c)){
+    const n=(c.notas||{})[g]||{};
+    crits+=`<h2>${g==="voz"?"Avaliação vocal":"Avaliação instrumental"}</h2><p class="sub">Do grave ao agudo: 1 insuficiente, 5 excelente.</p><div>`;
+    for(const [k,lbl] of CRIT[g]) crits+=`<div class="crit"><span class="name">${lbl}</span>${staff(g,k,n[k]||0)}<span class="lbl" id="lbl-${g}-${k}">${n[k]?SCALE[n[k]]:"sem nota"}</span></div>`;
+    crits+=`</div>`;
+  }
+  const res=c.resultado||"pendente", wa=waLink(c);
+  return `<div class="card">
+  <div class="form-head">
+    <button class="btn back" id="back">Voltar à lista</button>
+    <span class="status" id="save-status">Salvo na nuvem</span>
+  </div>
+  <input class="name" id="f-nome" type="text" data-f="nome" value="${esc(c.nome)}" placeholder="Nome do candidato" aria-label="Nome do candidato">
+  <div class="grid2" style="margin-top:18px">
+    <label class="f">Função<select data-f="funcao">${Object.entries(FUNCOES).map(([v,t])=>`<option value="${v}" ${c.funcao===v?"selected":""}>${t}</option>`).join("")}</select></label>
+    ${c.funcao==="voz"?"":`<label class="f">Instrumento<input type="text" data-f="detalhe" value="${esc(c.detalhe)}" placeholder="Ex.: teclado, bateria, violão"></label>`}
+    <label class="f">WhatsApp<input type="tel" data-f="telefone" value="${esc(c.telefone)}" placeholder="(62) 9 0000-0000"></label>
+    <label class="f">Músicas apresentadas<input type="text" data-f="musica" value="${esc(c.musica)}" placeholder="Títulos e tons"></label>
+  </div>
+  ${crits}
+  <h2>Perfil</h2><p class="sub">O que você observou além das notas. Isso alimenta o feedback.</p>
+  <div class="grid2">
+    <label class="f">Pontos fortes<textarea data-f="fortes" placeholder="Ex.: segura bem o tempo, boa leitura do ministro">${esc(c.fortes)}</textarea></label>
+    <label class="f">O que desenvolver<textarea data-f="desenvolver" placeholder="Ex.: apoio nas notas longas, abrir mais o agudo">${esc(c.desenvolver)}</textarea></label>
+  </div>
+  <label class="f" style="margin-top:14px">Observações gerais<span class="hint">Postura, comportamento na audição, disponibilidade, tempo de igreja.</span><textarea data-f="observacoes">${esc(c.observacoes)}</textarea></label>
+  <h2>Resultado</h2>
+  <div class="score-big"><b id="avg-big">${fmt(a)}</b><span id="avg-sub">média de ${cf.f} de ${cf.t} critérios</span></div>
+  <p class="suggest" id="sugg">${sug?`Pela média, a sugestão é: ${RESULT[sug].t.toLowerCase()}. A decisão é sua.`:"Preencha as notas para ver a sugestão."}</p>
+  <div class="seg" style="margin-top:12px" role="radiogroup" aria-label="Resultado">${Object.entries(RESULT).map(([v,r])=>`<label><input type="radio" name="resultado" value="${v}" ${res===v?"checked":""}><span class="dot ${r.c}"></span>${r.t}</label>`).join("")}</div>
+  <h2>Feedback para o candidato</h2><p class="sub">Gerado a partir das notas e do perfil. Revise antes de enviar.</p>
+  <div class="feedback-box"><textarea data-f="feedback" id="f-feedback" placeholder="Clique em Gerar feedback ou escreva aqui.">${esc(c.feedback)}</textarea></div>
+  <div class="actions">
+    <button class="btn gold" id="gen">${c.feedback?"Gerar de novo":"Gerar feedback"}</button>
+    <button class="btn" id="copy">Copiar texto</button>
+    <a class="btn" id="wa" href="${esc(wa)}" target="_blank" rel="noopener" ${wa?"":"hidden"}>Abrir no WhatsApp</a>
+  </div>
+  <div class="foot"><span class="status">Criado em ${new Date(c.criadoEm||Date.now()).toLocaleDateString("pt-BR")}</span><button class="btn danger" id="del">Excluir candidato</button></div>
+  </div>`;
+}
+function refreshScore(c){
+  const a=avgOf(c), cf=countFilled(c), s=suggestion(a);
+  $("#avg-big").textContent=fmt(a);
+  $("#avg-sub").textContent=`média de ${cf.f} de ${cf.t} critérios`;
+  $("#sugg").textContent=s?`Pela média, a sugestão é: ${RESULT[s].t.toLowerCase()}. A decisão é sua.`:"Preencha as notas para ver a sugestão.";
+  refreshListItem(c);
+}
+function refreshListItem(c){
+  const li=document.querySelector(`.cands button[data-id="${CSS.escape(c.id)}"]`); if(!li) return;
+  li.querySelector(".cname").textContent=c.nome||"Sem nome";
+  li.querySelector(".cmeta").textContent=(c.funcao||"voz")==="voz"?FUNCOES.voz:(c.detalhe||FUNCOES[c.funcao]);
+  const r=RESULT[c.resultado||"pendente"]; const d=li.querySelector(".dot"); d.className="dot "+r.c; d.title=r.t;
+  const a=avgOf(c), av=li.querySelector(".avg"); av.textContent=a==null?"—":fmt(a); av.classList.toggle("none",a==null);
+}
+function refreshWa(c){ const w=$("#wa"); if(!w) return; const l=waLink(c); w.hidden=!l; if(l) w.href=l; }
+
+function bindForm(){
+  const id=state.sel, c=()=>state.cands.get(id);
+  $("#back").onclick=()=>{ state.sel=null; render(); };
+  document.querySelectorAll("[data-f]").forEach(el=>{
+    const ev=el.tagName==="SELECT"?"change":"input";
+    el.addEventListener(ev,()=>{
+      const cur=c(); if(!cur) return; cur[el.dataset.f]=el.value; scheduleSave(id);
+      if(el.dataset.f==="funcao"){ render(); return; }
+      if(["nome","detalhe"].includes(el.dataset.f)) refreshListItem(cur);
+      if(["telefone","feedback"].includes(el.dataset.f)) refreshWa(cur);
+    });
+  });
+  document.querySelectorAll(".staff input").forEach(r=>r.addEventListener("change",()=>{
+    const cur=c(); cur.notas=cur.notas||{}; cur.notas[r.dataset.g]=cur.notas[r.dataset.g]||{};
+    const v=+r.value; cur.notas[r.dataset.g][r.dataset.k]=v;
+    $(`#lbl-${r.dataset.g}-${r.dataset.k}`).textContent=SCALE[v];
+    refreshScore(cur); scheduleSave(id);
+  }));
+  document.querySelectorAll('input[name="resultado"]').forEach(r=>r.addEventListener("change",()=>{ const cur=c(); cur.resultado=r.value; refreshListItem(cur); scheduleSave(id); }));
+  $("#copy").onclick=()=>copyText($("#f-feedback").value,$("#f-feedback"));
+  $("#gen").onclick=()=>generateFeedback(id);
+  $("#del").onclick=async e=>{
+    const b=e.currentTarget;
+    if(b.dataset.armed!=="1"){ b.dataset.armed="1"; b.textContent="Confirmar exclusão"; setTimeout(()=>{ if(b.isConnected){b.dataset.armed="";b.textContent="Excluir candidato";} },4000); return; }
+    clearTimeout(timers[id]); timers[id]=null;
+    const {error}=await sb.from("audicao_candidatos").delete().eq("id",id);
+    if(error){ toast("Não foi possível excluir."); return; }
+    state.cands.delete(id); state.sel=null; render(); toast("Candidato excluído");
+  };
+}
+async function copyText(text,ta){
+  try{ await navigator.clipboard.writeText(text); toast("Texto copiado"); }
+  catch(e){ if(ta){ ta.focus(); ta.select(); try{ document.execCommand("copy"); toast("Texto copiado"); return; }catch(_){} } toast("Selecione o texto e copie manualmente."); }
+}
+
+function candSummary(c){
+  let s=`Nome: ${c.nome||"(sem nome)"}\nFunção: ${FUNCOES[c.funcao||"voz"]}${c.funcao!=="voz"&&c.detalhe?" ("+c.detalhe+")":""}\n`;
+  if(c.musica) s+=`Músicas apresentadas: ${c.musica}\n`;
+  for(const g of groupsOf(c)){ const n=(c.notas||{})[g]||{}; s+=`Notas ${g==="voz"?"vocais":"instrumentais"} (1 a 5):\n`;
+    for(const [k,l] of CRIT[g]) s+=`- ${l}: ${n[k]?n[k]+" ("+SCALE[n[k]]+")":"não avaliado"}\n`; }
+  s+=`Média: ${fmt(avgOf(c))}\nResultado decidido: ${RESULT[c.resultado||"pendente"].t}\n`;
+  if(c.fortes) s+=`Pontos fortes observados: ${c.fortes}\n`;
+  if(c.desenvolver) s+=`O que desenvolver: ${c.desenvolver}\n`;
+  if(c.observacoes) s+=`Observações: ${c.observacoes}\n`;
+  return s;
+}
+
+async function generateFeedback(id){
+  const c=state.cands.get(id); if(!c) return;
+  if((c.resultado||"pendente")==="pendente"){ toast("Defina o resultado antes de gerar o feedback."); return; }
+  const ta=$("#f-feedback"), gen=$("#gen");
+  const assin=(state.cfg.assinatura||"").trim()||"Liderança do GP Music";
+  const prompt=`Você escreve em nome da liderança do GP Music, o ministério de louvor de uma igreja evangélica, que acabou de realizar uma audição para novos integrantes (vozes e instrumentistas).
+
+Escreva a mensagem de feedback individual que será enviada pelo WhatsApp ao candidato abaixo.
+
+Regras:
+- Português do Brasil, tom pastoral, acolhedor, honesto e específico. Nada de bajulação nem de linguagem genérica.
+- Chame a pessoa pelo primeiro nome (${firstName(c.nome)||"o candidato"}).
+- Estrutura: agradecimento pela disposição em servir; o resultado dito com clareza logo no início; 2 ou 3 pontos fortes concretos; 2 ou 3 pontos a desenvolver, cada um com uma sugestão prática de estudo ou exercício; próximo passo de acordo com o resultado (aprovado: boas-vindas e integração aos ensaios; em observação e treinamento: ainda não entra na escala, mas passa por um período de treinamento e acompanhamento focado nos pontos a desenvolver, com nova avaliação ao final; não aprovado: incentivo genuíno, deixar claro que a porta está aberta para uma próxima audição); encerramento breve e caloroso.
+- Entre 130 e 220 palavras. Sem títulos, sem listas com marcadores, sem emojis em excesso (no máximo um). Pode usar *negrito* do WhatsApp uma vez, no resultado.
+- Não cite as notas numéricas nem a média. Não invente fatos que não estejam nos dados.
+- Assine como: ${assin}
+- Responda somente com o texto da mensagem.
+
+Dados da avaliação:
+${candSummary(c)}`;
+  gen.disabled=true; const prev=ta.value; ta.value="Escrevendo o feedback…"; ta.disabled=true;
+  try{
+    const text=await gerarTexto(prompt);
+    const cur=state.cands.get(id); if(!cur) return;
+    cur.feedback=text.trim(); ta.value=cur.feedback; scheduleSave(id); refreshWa(cur);
+    gen.textContent="Gerar de novo";
+  }catch(e){ ta.value=prev; toast(iaErro(e)); }
+  finally{ gen.disabled=false; ta.disabled=false; }
+}
+
+/* ---------- relatório ---------- */
+function reportData(){
+  const all=sorted();
+  const by=r=>all.filter(c=>(c.resultado||"pendente")===r).length;
+  const groups={};
+  for(const g of ["voz","instrumento"]){
+    const list=all.filter(c=>groupsOf(c).includes(g));
+    const crit=CRIT[g].map(([k,l])=>{ const v=list.map(c=>((c.notas||{})[g]||{})[k]).filter(Boolean); return {l,avg:v.length?v.reduce((a,b)=>a+b,0)/v.length:null}; });
+    groups[g]={list:list.slice().sort((a,b)=>(avgOf(b)??-1)-(avgOf(a)??-1)),crit};
+  }
+  return {all,total:all.length,ap:by("aprovado"),rs:by("ressalvas"),na:by("nao"),pe:by("pendente"),groups};
+}
+function renderReport(){
+  const d=reportData(), cfg=state.cfg;
+  let h=`<div class="card">
+  <label class="f" style="margin-bottom:14px">Nome da audição<input type="text" data-c="titulo" value="${esc(cfg.titulo||"")}"></label>
+  <div class="grid2">
+    <label class="f">Data da audição<input type="date" data-c="data" value="${esc(cfg.data||"")}"></label>
+    <label class="f">Local<input type="text" data-c="local" value="${esc(cfg.local||"")}" placeholder="Ex.: templo sede"></label>
+    <label class="f">Avaliadores<input type="text" data-c="avaliadores" value="${esc(cfg.avaliadores||"")}" placeholder="Nomes da banca"></label>
+    <label class="f">Assinatura dos feedbacks<input type="text" data-c="assinatura" value="${esc(cfg.assinatura||"")}" placeholder="Liderança do GP Music"></label>
+  </div>
+  <h2>Resumo</h2>
+  <div class="stats">
+    <div class="stat"><b>${d.total}</b><span>candidatos</span></div>
+    <div class="stat"><b style="color:var(--ok)">${d.ap}</b><span>aprovados</span></div>
+    <div class="stat"><b style="color:var(--gold)">${d.rs}</b><span>em observação e treinamento</span></div>
+    <div class="stat"><b style="color:var(--no)">${d.na}</b><span>não aprovados</span></div>
+    ${d.pe?`<div class="stat"><b>${d.pe}</b><span>pendentes</span></div>`:""}
+  </div>`;
+  if(!d.total) return h+`<p class="empty">Adicione candidatos na aba Candidatos para montar o relatório.</p></div>`;
+  for(const g of ["voz","instrumento"]){
+    const G=d.groups[g]; if(!G.list.length) continue;
+    h+=`<h2>${g==="voz"?"Vozes":"Instrumentistas"}</h2><p class="sub">Ordenado pela média.</p><div class="tbl-wrap"><table><thead><tr><th>Candidato</th>${g==="voz"?"":"<th>Instrumento</th>"}<th>Média</th><th>Resultado</th></tr></thead><tbody>`;
+    for(const c of G.list){ const r=RESULT[c.resultado||"pendente"];
+      h+=`<tr><td>${esc(c.nome||"Sem nome")}</td>${g==="voz"?"":`<td>${esc(c.detalhe||"—")}</td>`}<td class="num">${fmt(avgOf(c))}</td><td><span class="pill"><span class="dot ${r.c}"></span>${r.t}</span></td></tr>`; }
+    h+=`</tbody></table></div><h2 style="font-size:18px">Média do grupo por critério</h2><p class="sub">Os critérios em vermelho, abaixo de 3, apontam onde investir em treinamento.</p><div class="bars">`;
+    for(const k of G.crit) h+=`<div class="bar"><span>${k.l}</span><span class="track"><span class="fill ${k.avg!=null&&k.avg<3?"low":""}" style="width:${k.avg?k.avg/5*100:0}%"></span></span><span>${fmt(k.avg)}</span></div>`;
+    h+=`</div>`;
+  }
+  h+=`<h2>Parecer geral</h2><p class="sub">Leitura da audição como um todo, para a liderança e o pastor.</p>
+  <textarea data-c="parecer" id="parecer" style="min-height:180px">${esc(cfg.parecer||"")}</textarea>
+  <div class="actions"><button class="btn gold" id="gen-par">${cfg.parecer?"Gerar de novo":"Gerar parecer"}</button>
+  <button class="btn" id="copy-rel">Copiar relatório</button>
+  <button class="btn" id="dl-rel">Baixar relatório</button></div></div>`;
+  return h;
+}
+function bindReport(){
+  document.querySelectorAll("[data-c]").forEach(el=>el.addEventListener("input",()=>{ state.cfg[el.dataset.c]=el.value; scheduleCfg(); }));
+  $("#gen-par").onclick=generateParecer;
+  $("#copy-rel").onclick=()=>copyText(reportText());
+  $("#dl-rel").onclick=downloadReport;
+}
+function reportText(){
+  const d=reportData(), cfg=state.cfg;
+  const dt=cfg.data?new Date(cfg.data+"T12:00").toLocaleDateString("pt-BR"):"";
+  let t=`RELATÓRIO DA AUDIÇÃO – ${(cfg.titulo||"GP MUSIC").toUpperCase()}\n${dt?"Data: "+dt+"\n":""}${cfg.local?"Local: "+cfg.local+"\n":""}${cfg.avaliadores?"Avaliadores: "+cfg.avaliadores+"\n":""}\n`;
+  t+=`Candidatos: ${d.total} | Aprovados: ${d.ap} | Em observação e treinamento: ${d.rs} | Não aprovados: ${d.na}${d.pe?" | Pendentes: "+d.pe:""}\n`;
+  for(const g of ["voz","instrumento"]){ const G=d.groups[g]; if(!G.list.length) continue;
+    t+=`\n${g==="voz"?"VOZES":"INSTRUMENTISTAS"}\n`;
+    G.list.forEach((c,i)=>{ t+=`${i+1}. ${c.nome||"Sem nome"}${g!=="voz"&&c.detalhe?" ("+c.detalhe+")":""} – média ${fmt(avgOf(c))} – ${RESULT[c.resultado||"pendente"].t}\n`; });
+    t+=`Média do grupo por critério: ${G.crit.map(k=>k.l+" "+fmt(k.avg)).join("; ")}\n`;
+  }
+  if(cfg.parecer) t+=`\nPARECER GERAL\n${cfg.parecer}\n`;
+  return t;
+}
+async function generateParecer(){
+  const d=reportData(); if(!d.total) return;
+  const b=$("#gen-par"), ta=$("#parecer");
+  let dados=reportText().replace(/\nPARECER GERAL[\s\S]*$/,"");
+  dados+="\nDETALHE POR CANDIDATO\n"+d.all.map(candSummary).join("\n");
+  const prompt=`Você é o responsável pelo ministério de louvor GP Music, de uma igreja evangélica, e acabou de conduzir uma audição para novos integrantes. Escreva o parecer geral da audição para a liderança e o pastor.
+
+Regras: português do Brasil, tom objetivo e pastoral, 3 a 5 parágrafos curtos em texto corrido, sem títulos nem marcadores. Cubra: visão geral do nível da audição; destaques (cite nomes de quem foi aprovado e por quê, em poucas palavras); as lacunas mais comuns no grupo, com base nas médias por critério; como o ministério pode apoiar quem ficou em observação e treinamento ou não foi aprovado (ex.: treinamento, mentoria, nova audição); recomendação de próximos passos para integração. Não invente fatos além dos dados. Responda somente com o texto.
+
+Dados:
+${dados}`;
+  b.disabled=true; const prev=ta.value; ta.value="Escrevendo o parecer…"; ta.disabled=true;
+  try{ const text=await gerarTexto(prompt); state.cfg.parecer=text.trim(); ta.value=state.cfg.parecer; scheduleCfg(); b.textContent="Gerar de novo"; }
+  catch(e){ ta.value=prev; toast(iaErro(e)); }
+  finally{ b.disabled=false; ta.disabled=false; }
+}
+function downloadReport(){
+  const d=reportData(), cfg=state.cfg;
+  const dt=cfg.data?new Date(cfg.data+"T12:00").toLocaleDateString("pt-BR"):"";
+  let body=`<h1>${esc(cfg.titulo||"Relatório da audição · GP Music")}</h1><p class="meta">${[dt,cfg.local,cfg.avaliadores?"Avaliadores: "+cfg.avaliadores:""].filter(Boolean).map(esc).join(" — ")}</p>
+  <p><b>${d.total}</b> candidatos · <b>${d.ap}</b> aprovados · <b>${d.rs}</b> em observação e treinamento · <b>${d.na}</b> não aprovados${d.pe?` · <b>${d.pe}</b> pendentes`:""}</p>`;
+  for(const g of ["voz","instrumento"]){ const G=d.groups[g]; if(!G.list.length) continue;
+    body+=`<h2>${g==="voz"?"Vozes":"Instrumentistas"}</h2><table><tr><th>#</th><th>Candidato</th>${g==="voz"?"":"<th>Instrumento</th>"}<th>Média</th><th>Resultado</th></tr>`;
+    G.list.forEach((c,i)=>{ body+=`<tr><td>${i+1}</td><td>${esc(c.nome||"Sem nome")}</td>${g==="voz"?"":`<td>${esc(c.detalhe||"—")}</td>`}<td>${fmt(avgOf(c))}</td><td>${RESULT[c.resultado||"pendente"].t}</td></tr>`; });
+    body+=`</table><p class="meta">Média do grupo por critério: ${G.crit.map(k=>esc(k.l)+" "+fmt(k.avg)).join("; ")}</p>`;
+  }
+  if(cfg.parecer) body+=`<h2>Parecer geral</h2>${cfg.parecer.split(/\n+/).map(p=>`<p>${esc(p)}</p>`).join("")}`;
+  body+=`<h2>Fichas individuais</h2>`;
+  for(const c of d.all){ body+=`<div class="ficha"><h3>${esc(c.nome||"Sem nome")} <span class="meta">— ${FUNCOES[c.funcao||"voz"]}${c.funcao!=="voz"&&c.detalhe?" ("+esc(c.detalhe)+")":""} · média ${fmt(avgOf(c))} · ${RESULT[c.resultado||"pendente"].t}</span></h3>`;
+    if(c.musica) body+=`<p><b>Músicas:</b> ${esc(c.musica)}</p>`;
+    if(c.fortes) body+=`<p><b>Pontos fortes:</b> ${esc(c.fortes)}</p>`;
+    if(c.desenvolver) body+=`<p><b>A desenvolver:</b> ${esc(c.desenvolver)}</p>`;
+    if(c.observacoes) body+=`<p><b>Observações:</b> ${esc(c.observacoes)}</p>`;
+    body+=`</div>`; }
+  const html=`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><title>${esc(cfg.titulo||"Relatório da audição GP Music")}</title><style>body{font-family:Georgia,serif;max-width:760px;margin:40px auto;padding:0 20px;color:#1B2140;line-height:1.55}h1{font-weight:400}h2{font-weight:400;margin-top:32px;border-bottom:1px solid #D9DCE6;padding-bottom:4px}h3{font-size:17px;margin:18px 0 4px}table{border-collapse:collapse;width:100%;font-family:system-ui,sans-serif;font-size:14px}th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #D9DCE6}.meta{color:#5D6480;font-size:14px;font-weight:400}.ficha{break-inside:avoid}</style></head><body>${body}</body></html>`;
+  const url=URL.createObjectURL(new Blob([html],{type:"text/html"}));
+  const a=document.createElement("a"); a.href=url; a.download=`relatorio-audicao-gp-music${cfg.data?"-"+cfg.data:""}.html`;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),2000);
+}
+
+/* ---------- início ---------- */
+sb.auth.onAuthStateChange((ev)=>{ if(ev==="SIGNED_OUT"&&state.user){ state.user=null; showLogin("Sua sessão terminou. Entre de novo."); } });
+(async()=>{
+  const {data:{session}}=await sb.auth.getSession();
+  if(session&&session.user) afterLogin(session.user); else showLogin();
+})();
+})();
+</script>
+</body>
+</html>
