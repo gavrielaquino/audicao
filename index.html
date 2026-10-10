@@ -177,6 +177,7 @@ dialog .row{display:flex;gap:8px;justify-content:flex-end}
         <button class="btn" id="acct-btn" aria-haspopup="true" aria-expanded="false">Conta</button>
         <div class="acct-menu" id="acct-menu">
           <div class="who" id="acct-who"></div>
+          <div class="who" style="border:0;margin:0;padding-top:0">Versão do app: 10/10 · v8</div>
           <button id="chg-pass">Trocar senha</button>
           <button id="logout">Sair</button>
         </div>
@@ -634,6 +635,7 @@ function revisarFeedback(t){
   const f=[], low=t.toLowerCase();
   if(!terminou(t)) f.push('o texto está incompleto; escreva a mensagem inteira até o "Deus abençoe" e a assinatura');
   const achadas=PROIBIDAS.filter(w=>low.includes(w));
+  if(/chamou\s+(muita\s+)?aten[cç][aã]o|ficou\s+marcad|ficaram\s+marcad|foi\s+notad|foram\s+notad/i.test(t)) f.push('usou expressão ambígua no elogio ("chamou atenção", "ficou marcado"); deixe claro que é um elogio, como "a gente gostou muito de..." ou "um dos seus pontos fortes é..."');
   if(/back\s?vocal|solando|solar algumas|reuni[oõ]es? complementar|\bGPs\b/i.test(t)) f.push("mencionou planos internos ou nomes internos (funções futuras, reuniões, siglas); remova esses detalhes e use termos gerais");
   if(/melhor(es)?\s+(\S+\s+)?(da|desta|nesta)\s+audi[cç][aã]o|outros candidatos|dos candidatos/i.test(t)) f.push("comparou a pessoa com outros candidatos; descreva a qualidade sem comparar");
   if(achadas.length) f.push(`usou expressões proibidas (${achadas.map(w=>'"'+w+'"').join(", ")})`);
@@ -681,7 +683,7 @@ As anotações da banca (pontos fortes, o que desenvolver e observações gerais
 CONTEÚDO, NESTA ORDEM
 1. Agradeça com carinho, em uma frase, pela disposição de servir no GP Music.
 2. Comunique o resultado logo em seguida, com clareza e delicadeza, falando do que acontece agora e não do que a banca "conseguiu" ou "não conseguiu". Bons modelos: "nesta audição, *você ainda não vai entrar na escala*"; "*você vai começar no período de observação e treinamento*"; "*você foi aprovado(a) para o GP Music*" (adapte o gênero só se o nome deixar claro; na dúvida, construa a frase sem marcar gênero).
-3. Valorize os pontos fortes que a banca anotou, de forma concreta e calorosa.
+3. Valorize os pontos fortes que a banca anotou, de forma concreta e calorosa. O elogio precisa ser inequívoco: use expressões claramente positivas, como "a gente gostou muito de...", "um dos seus pontos fortes é...", "foi muito bom ver...". Evite verbos ambíguos que também podem soar como crítica, como "chamou atenção", "ficou marcado", "foi notado", "a gente percebeu".
 4. Apresente no máximo 2 pontos de melhoria, os mais importantes anotados pela banca. Introduza-os chamando-os de "pontos de melhoria" (por exemplo: "Os pontos de melhoria são a afinação e a projeção da voz."), nunca de "próximos passos". Quando o resultado não for aprovado ou for observação e treinamento, deixe claro com naturalidade que são esses pontos que pesaram na decisão (por exemplo: "Foram esses pontos que pesaram na decisão desta vez."). Fale deles com gentileza, como algo a desenvolver, nunca como defeitos. Para cada ponto, dê UMA sugestão prática, simples e explicada em palavras comuns (veja o guia abaixo). Não empilhe exercícios: menos sugestões, mais claras.
 5. Próximo passo, de acordo com o resultado: ${proximo}
 
@@ -704,7 +706,7 @@ TOM E LINGUAGEM
 - Seja específico sobre esta pessoa. Se uma frase serviria para qualquer candidato, corte.
 - Não use: "candidatura", "precisamos ser honestos", "coração aberto", "a porta continua aberta", "você tem potencial", "jornada", "caminhada", "chamado", "conte conosco", "de coração", "bom gosto musical", nem elogios genéricos.
 - Não dramatize a notícia nem peça desculpas por ela.
-- Não cite notas numéricas, médias nem compare com outros candidatos. Isso vale mesmo quando a anotação da banca fizer a comparação: "uma das melhores afinações da audição" vira "sua afinação chamou muita atenção da banca".
+- Não cite notas numéricas, médias nem compare com outros candidatos. Isso vale mesmo quando a anotação da banca fizer a comparação: "uma das melhores afinações da audição" vira "sua afinação é um dos seus pontos fortes, a gente gostou muito".
 - Não comente a vida espiritual da pessoa nem faça promessas de vaga ou de datas.
 - Nunca invente fatos: só mencione comportamentos, músicas ou situações que estejam nos dados.
 
@@ -755,6 +757,8 @@ ${candSummary({...c,fortes:"",desenvolver:"",observacoes:""})}`;
         if(terminou(t2)||!terminou(text)) text=t2;
       }catch(_){ /* fica com a primeira versão */ }
       if(!terminou(text)) throw Object.assign(new Error("incompleto"),{code:"incompleto"});
+      const restantes=revisarFeedback(text);
+      if(restantes.length) setTimeout(()=>toast("Revise antes de enviar: o texto ainda "+restantes.join("; ")+"."),400);
     }
     const cur=state.cands.get(id); if(!cur) return;
     cur.feedback=text.trim(); ta.value=cur.feedback; scheduleSave(id); refreshWa(cur);
