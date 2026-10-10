@@ -637,7 +637,7 @@ async function generateFeedback(id){
     ? `APROVADO. Dê as boas-vindas ao GP Music e diga que a coordenação vai entrar em contato para integrar a pessoa aos ensaios e à escala. Mesmo aprovada, cite 1 ponto para continuar desenvolvendo, com uma sugestão prática.`
     : res==="ressalvas"
     ? `EM OBSERVAÇÃO E TREINAMENTO. Explique que a pessoa ainda não entra na escala agora e passa por um período de treinamento e acompanhamento. Convide-a para a turma de aperfeiçoamento do ministério, focada nos pontos a desenvolver, e diga que ao final haverá uma nova avaliação. Deixe claro que o objetivo é prepará-la bem antes de assumir a escala.`
-    : `NÃO APROVADO. Diga com clareza e delicadeza que, nesta audição, a pessoa ainda não vai entrar na escala. Explique o motivo em UMA frase curta: a decisão é para resguardá-la, porque a gente prefere que ela chegue à escala segura e preparada (sem sermão, sem falar em "algo sério", sem repetir a ideia). Convide para a turma de aperfeiçoamento do ministério e diga que vocês vão planejar juntos a próxima audição.`;
+    : `NÃO APROVADO. Diga com clareza e delicadeza que, nesta audição, a pessoa ainda não vai entrar na escala. Logo depois, inclua obrigatoriamente uma frase curta com a ideia de resguardo, no espírito de: "Essa decisão é para te resguardar: a gente prefere que você chegue à escala seguro e preparado." (sem sermão, sem repetir a ideia). Convide para a turma de aperfeiçoamento do ministério e diga que vocês vão planejar juntos a próxima audição.`;
   const prompt=`Você escreve em nome da liderança do GP Music, o ministério de louvor de uma igreja evangélica, que realizou uma audição para novos integrantes (vozes e instrumentistas). Escreva a mensagem de feedback individual que será enviada pelo WhatsApp ao candidato abaixo.
 
 FORMATO
@@ -667,6 +667,9 @@ TOM E LINGUAGEM
 - Ameno, amigável e acolhedor, como um líder de louvor que conhece e gosta da pessoa e conversa com ela depois do culto. Trate por "você". A pessoa deve terminar a leitura se sentindo vista, respeitada e motivada.
 - Honesto, mas sempre gentil: prefira "ainda", "o próximo passo é", "vale investir em" a palavras como "falhou", "erro", "fraco", "problema" ou "precisa melhorar muito".
 - Frases curtas e naturais, como numa conversa de WhatsApp; nada de linguagem de relatório ou de empresa.
+- Caloroso, mas bem escrito: evite gírias e expressões muito coloquiais ("bacana", "se virou", "tipo", "aquele de beber mesmo", "como é que fica", "show").
+- Sugestões em tom de convite, não de ordem: "vale cantar...", "uma boa prática é...", "ajuda bastante...". Evite imperativos como "tenta", "grava", "trabalha".
+- Não use os nomes dos critérios como rótulos ("sua linguagem musical", "sua postura ministerial", "sua dinâmica"). Descreva o que a pessoa fez, em palavras do dia a dia.
 - Fale como "a gente" do começo ao fim (a gente viu, a gente quer, a gente vai). Não misture com "nós", "reconhecemos", "sugerimos".
 - Não use pronomes oblíquos formais como "aprová-lo", "convidá-la", "prepará-lo". Prefira "convidar você", "te convidar".
 - Não suponha o que a pessoa está sentindo (nada de "sabemos que é difícil", "pode ser desapontador", "entendemos sua frustração").
@@ -697,7 +700,13 @@ ${orient?`
 ORIENTAÇÕES ADICIONAIS DA COORDENAÇÃO (têm prioridade sobre as regras acima, exceto a de não inventar fatos)
 ${orient}
 `:""}
-Responda somente com o texto da mensagem.
+ANTES DE RESPONDER, REVISE O SEU TEXTO
+- Tem entre 110 e 170 palavras? Se passou, corte.
+- Usou alguma palavra ou expressão da lista proibida? Troque.
+- Usou algum nome de critério como rótulo, gíria ou imperativo? Reescreva.
+- Algum fato não está nas anotações ou nos dados? Remova.
+
+Responda somente com o texto final da mensagem.
 
 ANOTAÇÕES DOS COORDENADORES (fonte principal)
 Pontos fortes: ${(c.fortes||"").trim()||"(não preenchido)"}
