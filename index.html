@@ -353,7 +353,7 @@ $("#aud-cancel").onclick=()=>$("#dlg-aud").close();
 $("#form-aud").onsubmit=async e=>{
   e.preventDefault();
   const titulo=$("#aud-nome").value.trim(); if(!titulo) return;
-  const {data,error}=await sb.from("audicoes").insert({titulo,dados:{assinatura:state.cfg.assinatura||""}}).select().single();
+  const {data,error}=await sb.from("audicoes").insert({titulo,dados:{assinatura:state.cfg.assinatura||"",orientacoes:state.cfg.orientacoes||""}}).select().single();
   if(error){ toast("Não foi possível criar a audição."); return; }
   $("#dlg-aud").close();
   state.auds=[data,...state.auds.filter(a=>a.id!==data.id)];
@@ -631,21 +631,74 @@ async function generateFeedback(id){
   if((c.resultado||"pendente")==="pendente"){ toast("Defina o resultado antes de gerar o feedback."); return; }
   const ta=$("#f-feedback"), gen=$("#gen");
   const assin=(state.cfg.assinatura||"").trim()||"Liderança do GP Music";
-  const prompt=`Você escreve em nome da liderança do GP Music, o ministério de louvor de uma igreja evangélica, que acabou de realizar uma audição para novos integrantes (vozes e instrumentistas).
+  const orient=(state.cfg.orientacoes||"").trim();
+  const res=c.resultado;
+  const proximo = res==="aprovado"
+    ? `APROVADO. Dê as boas-vindas ao GP Music e diga que a coordenação vai entrar em contato para integrar a pessoa aos ensaios e à escala. Mesmo aprovada, cite 1 ponto para continuar desenvolvendo, com uma sugestão prática.`
+    : res==="ressalvas"
+    ? `EM OBSERVAÇÃO E TREINAMENTO. Explique que a pessoa ainda não entra na escala agora e passa por um período de treinamento e acompanhamento. Convide-a para a turma de aperfeiçoamento do ministério, focada nos pontos a desenvolver, e diga que ao final haverá uma nova avaliação. Deixe claro que o objetivo é prepará-la bem antes de assumir a escala.`
+    : `NÃO APROVADO. Explique com clareza e cuidado que, neste momento, a pessoa não entra no ministério, e que essa decisão existe para resguardá-la: assumir a escala antes de estar preparada pode expô-la e pesar sobre ela. Convide-a para a turma de aperfeiçoamento do ministério, dê sugestões de estudo pessoal e diga que vamos planejar juntos a próxima audição.`;
+  const prompt=`Você escreve em nome da liderança do GP Music, o ministério de louvor de uma igreja evangélica, que realizou uma audição para novos integrantes (vozes e instrumentistas). Escreva a mensagem de feedback individual que será enviada pelo WhatsApp ao candidato abaixo.
 
-Escreva a mensagem de feedback individual que será enviada pelo WhatsApp ao candidato abaixo.
+FORMATO
+- Comece exatamente com: "Paz, ${firstName(c.nome)||"querido(a)"}!" em uma linha própria.
+- De 3 a 5 parágrafos curtos, entre 120 e 190 palavras no total. Texto corrido, sem títulos e sem listas. No máximo um emoji simples, e só se soar natural.
+- Use *negrito* do WhatsApp uma única vez, na frase que comunica o resultado.
+- Encerre com "Deus abençoe," e, na linha de baixo, a assinatura: ${assin}
 
-Regras:
-- Português do Brasil, tom pastoral, acolhedor, honesto e específico. Nada de bajulação nem de linguagem genérica.
-- Chame a pessoa pelo primeiro nome (${firstName(c.nome)||"o candidato"}).
-- Estrutura: agradecimento pela disposição em servir; o resultado dito com clareza logo no início; 2 ou 3 pontos fortes concretos; 2 ou 3 pontos a desenvolver, cada um com uma sugestão prática de estudo ou exercício; próximo passo de acordo com o resultado (aprovado: boas-vindas e integração aos ensaios; em observação e treinamento: ainda não entra na escala, mas passa por um período de treinamento e acompanhamento focado nos pontos a desenvolver, com nova avaliação ao final; não aprovado: incentivo genuíno, deixar claro que a porta está aberta para uma próxima audição); encerramento breve e caloroso.
-- Entre 130 e 220 palavras. Sem títulos, sem listas com marcadores, sem emojis em excesso (no máximo um). Pode usar *negrito* do WhatsApp uma vez, no resultado.
-- Não cite as notas numéricas nem a média. Não invente fatos que não estejam nos dados.
-- Assine como: ${assin}
-- Responda somente com o texto da mensagem.
+FONTE PRINCIPAL: AS ANOTAÇÕES DOS COORDENADORES
+As anotações da banca (pontos fortes, o que desenvolver e observações gerais) são o coração desta mensagem. As notas de 1 a 5 servem só como apoio.
+- Todo ponto forte anotado pela banca deve aparecer na mensagem, de forma reconhecível.
+- Os pontos de melhoria anotados pela banca têm prioridade sobre os critérios com nota baixa. Use os critérios só para completar, se faltar assunto.
+- Use as observações gerais para personalizar (por exemplo, algo marcante na apresentação ou nas músicas escolhidas), desde que seja algo positivo ou útil para o candidato.
+- As anotações foram escritas entre coordenadores, às vezes de forma curta ou direta. Nunca copie as frases nem cite que são anotações. Reescreva cada ponto com suas palavras, de forma gentil e voltada para o candidato. Exemplo: "desafinou bastante no refrão" vira algo como "no refrão, a afinação ainda oscilou um pouco".
+- Se alguma observação for interna, sensível ou não ajudar o candidato (comparações, comentários sobre aparência, vida pessoal, bastidores da decisão), simplesmente não a mencione.
 
-Dados da avaliação:
-${candSummary(c)}`;
+CONTEÚDO, NESTA ORDEM
+1. Agradeça com carinho, em uma frase, pela disposição de servir no GP Music.
+2. Comunique o resultado logo em seguida, com clareza e delicadeza.
+3. Valorize os pontos fortes que a banca anotou, de forma concreta e calorosa.
+4. Apresente os pontos de melhoria anotados pela banca como próximos passos de crescimento, nunca como defeitos. Para cada um, dê uma sugestão prática de estudo (veja o guia abaixo).
+5. Próximo passo, de acordo com o resultado: ${proximo}
+
+TOM E LINGUAGEM
+- Ameno, amigável e acolhedor, como um líder de louvor que conhece e gosta da pessoa e conversa com ela depois do culto. Trate por "você". A pessoa deve terminar a leitura se sentindo vista, respeitada e motivada.
+- Honesto, mas sempre gentil: prefira "ainda", "o próximo passo é", "vale investir em" a palavras como "falhou", "erro", "fraco", "problema" ou "precisa melhorar muito".
+- Frases curtas e naturais, como numa conversa de WhatsApp; nada de linguagem de relatório ou de empresa.
+- Seja específico sobre esta pessoa. Se uma frase serviria para qualquer candidato, corte.
+- Não use: "candidatura", "precisamos ser honestos", "coração aberto", "a porta continua aberta", "você tem potencial", "jornada", "chamado", nem elogios genéricos.
+- Não dramatize a notícia nem peça desculpas por ela.
+- Não cite notas numéricas, médias nem compare com outros candidatos.
+- Não comente a vida espiritual da pessoa nem faça promessas de vaga ou de datas.
+- Nunca invente fatos: só mencione comportamentos, músicas ou situações que estejam nos dados.
+
+GUIA DE SUGESTÕES PRÁTICAS (use só as que combinam com os pontos a desenvolver)
+- Afinação: cantar com afinador ou nota de referência (drone) tocando; gravar-se e ouvir comparando com o original.
+- Ritmo e tempo: estudar e cantar/tocar com metrônomo, começando mais lento; tocar junto com as gravações originais.
+- Linguagem musical: ouvir atentamente as versões de referência do repertório da igreja, observando frases, dinâmicas e estilo; tirar músicas de ouvido.
+- Respiração e apoio: exercícios diários de sopro sustentado e de canudo (SOVT); trabalhar frases longas com controle de ar.
+- Extensão e projeção: vocalizes progressivos sem forçar; trabalhar ressonância e apoio antes de volume.
+- Dinâmica e interpretação: estudar a letra, marcar onde crescer e onde recolher; cantar pensando na mensagem.
+- Percepção e segunda voz: cantar intervalos e a segunda voz de músicas conhecidas junto com a gravação.
+- Técnica no instrumento: rotina diária curta de técnica e escalas no tom das músicas.
+- Conhecimento harmônico: estudar campo harmônico e cadências mais usadas no repertório.
+- Percepção e tocar de ouvido: tirar músicas de ouvido, começando pelo baixo e pelos acordes principais.
+- Dinâmica e acompanhamento: tocar com gravações, ouvindo o vocal e abrindo espaço para ele.
+- Postura ministerial: pontualidade, preparo prévio do repertório e atenção à condução do ministro.
+${orient?`
+ORIENTAÇÕES ADICIONAIS DA COORDENAÇÃO (têm prioridade sobre as regras acima, exceto a de não inventar fatos)
+${orient}
+`:""}
+Responda somente com o texto da mensagem.
+
+ANOTAÇÕES DOS COORDENADORES (fonte principal)
+Pontos fortes: ${(c.fortes||"").trim()||"(não preenchido)"}
+O que desenvolver: ${(c.desenvolver||"").trim()||"(não preenchido)"}
+Observações gerais: ${(c.observacoes||"").trim()||"(não preenchido)"}
+
+DADOS COMPLEMENTARES
+${candSummary({...c,fortes:"",desenvolver:"",observacoes:""})}`;
+  if(!(c.fortes||"").trim()&&!(c.desenvolver||"").trim()&&!(c.observacoes||"").trim()) toast("Dica: preencha pontos fortes e o que desenvolver para o feedback ficar mais pessoal.");
   gen.disabled=true; const prev=ta.value; ta.value="Escrevendo o feedback…"; ta.disabled=true;
   try{
     const text=await gerarTexto(prompt);
@@ -678,6 +731,7 @@ function renderReport(){
     <label class="f">Avaliadores<input type="text" data-c="avaliadores" value="${esc(cfg.avaliadores||"")}" placeholder="Nomes da banca"></label>
     <label class="f">Assinatura dos feedbacks<input type="text" data-c="assinatura" value="${esc(cfg.assinatura||"")}" placeholder="Liderança do GP Music"></label>
   </div>
+  <label class="f" style="margin-top:14px">Orientações para os textos<span class="hint">Valem para os feedbacks e o parecer desta audição e passam para as próximas. Ex.: "A turma de aperfeiçoamento começa em março, às terças."</span><textarea data-c="orientacoes">${esc(cfg.orientacoes||"")}</textarea></label>
   <h2>Resumo</h2>
   <div class="stats">
     <div class="stat"><b>${d.total}</b><span>candidatos</span></div>
@@ -729,7 +783,9 @@ async function generateParecer(){
   dados+="\nDETALHE POR CANDIDATO\n"+d.all.map(candSummary).join("\n");
   const prompt=`Você é o responsável pelo ministério de louvor GP Music, de uma igreja evangélica, e acabou de conduzir uma audição para novos integrantes. Escreva o parecer geral da audição para a liderança e o pastor.
 
-Regras: português do Brasil, tom objetivo e pastoral, 3 a 5 parágrafos curtos em texto corrido, sem títulos nem marcadores. Cubra: visão geral do nível da audição; destaques (cite nomes de quem foi aprovado e por quê, em poucas palavras); as lacunas mais comuns no grupo, com base nas médias por critério; como o ministério pode apoiar quem ficou em observação e treinamento ou não foi aprovado (ex.: treinamento, mentoria, nova audição); recomendação de próximos passos para integração. Não invente fatos além dos dados. Responda somente com o texto.
+Regras: português do Brasil, tom objetivo e pastoral, 3 a 5 parágrafos curtos em texto corrido, sem títulos nem marcadores. Cubra: visão geral do nível da audição; destaques (cite nomes de quem foi aprovado e por quê, em poucas palavras); as lacunas mais comuns no grupo, com base nas médias por critério; o encaminhamento de quem ficou em observação e treinamento ou não foi aprovado: convite para a turma de aperfeiçoamento do ministério e planejamento conjunto da próxima audição, lembrando que a não aprovação existe para resguardar o próprio candidato; próximos passos para integrar os aprovados aos ensaios e à escala. Evite frases genéricas e elogios vagos. Não invente fatos além dos dados. Responda somente com o texto.${(state.cfg.orientacoes||"").trim()?`
+
+Orientações adicionais da coordenação: ${state.cfg.orientacoes.trim()}`:""}
 
 Dados:
 ${dados}`;
