@@ -634,6 +634,8 @@ function revisarFeedback(t){
   const f=[], low=t.toLowerCase();
   if(!terminou(t)) f.push('o texto está incompleto; escreva a mensagem inteira até o "Deus abençoe" e a assinatura');
   const achadas=PROIBIDAS.filter(w=>low.includes(w));
+  if(/back\s?vocal|solando|solar algumas|reuni[oõ]es? complementar|\bGPs\b/i.test(t)) f.push("mencionou planos internos ou nomes internos (funções futuras, reuniões, siglas); remova esses detalhes e use termos gerais");
+  if(/melhor(es)?\s+(\S+\s+)?(da|desta|nesta)\s+audi[cç][aã]o|outros candidatos|dos candidatos/i.test(t)) f.push("comparou a pessoa com outros candidatos; descreva a qualidade sem comparar");
   if(achadas.length) f.push(`usou expressões proibidas (${achadas.map(w=>'"'+w+'"').join(", ")})`);
   if(!/\*[^*\n]+\*/.test(t)) f.push("não colocou em *negrito* a frase do resultado");
   if(/—/.test(t)) f.push("usou travessão");
@@ -672,6 +674,9 @@ As anotações da banca (pontos fortes, o que desenvolver e observações gerais
 - Use as observações gerais para personalizar (por exemplo, algo marcante na apresentação ou nas músicas escolhidas), desde que seja algo positivo ou útil para o candidato.
 - As anotações foram escritas entre coordenadores, às vezes de forma curta ou direta. Nunca copie as frases nem cite que são anotações. Reescreva cada ponto com suas palavras, de forma gentil e voltada para o candidato. Exemplo: "desafinou bastante no refrão" vira algo como "no refrão, a afinação ainda oscilou um pouco".
 - Se alguma observação for interna, sensível ou não ajudar o candidato (comparações, comentários sobre aparência, vida pessoal, bastidores da decisão), simplesmente não a mencione.
+- Planos e possibilidades futuras anotados pela banca ficam fora do texto: funções que a pessoa poderia assumir (backvocal, solos, ministrar, tocar em tal culto), escalas, reuniões ou eventos específicos. O feedback fala do resultado, das qualidades e dos pontos de melhoria, sem antecipar planos internos.
+- Não cite nomes internos de grupos, reuniões ou siglas da igreja (por exemplo, "GPs", "célula", nomes de cultos). Troque por expressões gerais, como "sua presença e disponibilidade" ou "nas atividades do ministério".
+- Prefira menos detalhes e mais clareza: no máximo 2 pontos fortes, descritos de forma simples.
 
 CONTEÚDO, NESTA ORDEM
 1. Agradeça com carinho, em uma frase, pela disposição de servir no GP Music.
@@ -699,7 +704,7 @@ TOM E LINGUAGEM
 - Seja específico sobre esta pessoa. Se uma frase serviria para qualquer candidato, corte.
 - Não use: "candidatura", "precisamos ser honestos", "coração aberto", "a porta continua aberta", "você tem potencial", "jornada", "caminhada", "chamado", "conte conosco", "de coração", "bom gosto musical", nem elogios genéricos.
 - Não dramatize a notícia nem peça desculpas por ela.
-- Não cite notas numéricas, médias nem compare com outros candidatos.
+- Não cite notas numéricas, médias nem compare com outros candidatos. Isso vale mesmo quando a anotação da banca fizer a comparação: "uma das melhores afinações da audição" vira "sua afinação chamou muita atenção da banca".
 - Não comente a vida espiritual da pessoa nem faça promessas de vaga ou de datas.
 - Nunca invente fatos: só mencione comportamentos, músicas ou situações que estejam nos dados.
 
@@ -710,6 +715,9 @@ GUIA DE SUGESTÕES PRÁTICAS (use só as que combinam com os pontos a desenvolve
 - Respiração e apoio: alguns minutos por dia de exercício com canudo (cantar soprando por um canudo) e de sopro longo e constante; treinar frases longas sem perder o ar no final.
 - Extensão e projeção: vocalizes progressivos sem forçar; trabalhar ressonância e apoio antes de volume.
 - Dinâmica e interpretação: estudar a letra, marcar onde crescer e onde recolher; cantar pensando na mensagem.
+- Vibrato: treinar notas longas cantadas retas, sem vibrato, e só soltar o vibrato no final da frase, quando for uma escolha; gravar e ouvir para conferir.
+- Estilo (pop, rock, worship etc.): ouvir as versões originais prestando atenção em como o cantor ataca e termina as frases, no uso de vibrato e na intensidade, e cantar junto imitando esses detalhes.
+- Intensidade e controle da voz: cantar a mesma frase em três intensidades (suave, média e forte) mantendo a afinação e o apoio.
 - Percepção e segunda voz: cantar intervalos e a segunda voz de músicas conhecidas junto com a gravação.
 - Técnica no instrumento: rotina diária curta de técnica e escalas no tom das músicas.
 - Conhecimento harmônico: estudar campo harmônico e cadências mais usadas no repertório.
