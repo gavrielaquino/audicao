@@ -449,7 +449,9 @@ async function gerarTexto(prompt){
 function iaErro(e){
   return ({nao_configurado:"A geração automática ainda não foi configurada. Você pode escrever o texto à mão.",
     nao_autorizado:"Sua conta não tem permissão para gerar textos.",
-    limite:"Muitos pedidos seguidos. Aguarde um pouco e tente de novo."})[e&&e.code] || "Não foi possível gerar agora. Tente de novo em instantes.";
+    limite:"Muitos pedidos seguidos. Aguarde um minuto e tente de novo.",
+    sobrecarga:"O serviço de IA está sobrecarregado agora. Tente de novo em alguns minutos.",
+    incompleto:"O texto saiu incompleto. Clique em gerar de novo."})[e&&e.code] || "Não foi possível gerar agora. Tente de novo em instantes.";
 }
 
 /* ---------- navegação ---------- */
@@ -627,8 +629,10 @@ function candSummary(c){
 }
 
 const PROIBIDAS=["candidatura","precisamos ser honestos","coração aberto","porta continua aberta","você tem potencial","jornada","caminhada","chamado","conte conosco","de coração","bom gosto","bacana","se virou","tipo assim","aquele de beber","como é que fica","postura ministerial","linguagem musical","não conseguimos","desapontador","desapontadora","diafragma","drone","sovt"];
+function terminou(t){ return /deus aben[cç]oe/i.test(t) && t.trim().length>200; }
 function revisarFeedback(t){
   const f=[], low=t.toLowerCase();
+  if(!terminou(t)) f.push('o texto está incompleto; escreva a mensagem inteira até o "Deus abençoe" e a assinatura');
   const achadas=PROIBIDAS.filter(w=>low.includes(w));
   if(achadas.length) f.push(`usou expressões proibidas (${achadas.map(w=>'"'+w+'"').join(", ")})`);
   if(!/\*[^*\n]+\*/.test(t)) f.push("não colocou em *negrito* a frase do resultado");
@@ -739,8 +743,10 @@ ${candSummary({...c,fortes:"",desenvolver:"",observacoes:""})}`;
     if(falhas.length){
       ta.value="Ajustando o texto…";
       try{
-        text=await gerarTexto(prompt+`\n\nVOCÊ JÁ ESCREVEU ESTA VERSÃO:\n${text}\n\nEla tem estes problemas: ${falhas.join("; ")}. Reescreva a mensagem corrigindo todos eles e mantendo o restante. Responda somente com o texto final.`);
+        const t2=await gerarTexto(prompt+`\n\nVOCÊ JÁ ESCREVEU ESTA VERSÃO:\n${text}\n\nEla tem estes problemas: ${falhas.join("; ")}. Reescreva a mensagem corrigindo todos eles e mantendo o restante. Responda somente com o texto final.`);
+        if(terminou(t2)||!terminou(text)) text=t2;
       }catch(_){ /* fica com a primeira versão */ }
+      if(!terminou(text)) throw Object.assign(new Error("incompleto"),{code:"incompleto"});
     }
     const cur=state.cands.get(id); if(!cur) return;
     cur.feedback=text.trim(); ta.value=cur.feedback; scheduleSave(id); refreshWa(cur);
