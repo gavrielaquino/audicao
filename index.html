@@ -177,7 +177,7 @@ dialog .row{display:flex;gap:8px;justify-content:flex-end}
         <button class="btn" id="acct-btn" aria-haspopup="true" aria-expanded="false">Conta</button>
         <div class="acct-menu" id="acct-menu">
           <div class="who" id="acct-who"></div>
-          <div class="who" style="border:0;margin:0;padding-top:0">Versão do app: 10/10 · v8</div>
+          <div class="who" style="border:0;margin:0;padding-top:0">Versão do app: 10/10 · v9</div>
           <button id="chg-pass">Trocar senha</button>
           <button id="logout">Sair</button>
         </div>
@@ -631,8 +631,9 @@ function candSummary(c){
 
 const PROIBIDAS=["candidatura","precisamos ser honestos","coração aberto","porta continua aberta","você tem potencial","jornada","caminhada","chamado","conte conosco","de coração","bom gosto","bacana","se virou","tipo assim","aquele de beber","como é que fica","postura ministerial","linguagem musical","não conseguimos","desapontador","desapontadora","diafragma","drone","sovt"];
 function terminou(t){ return /deus aben[cç]oe/i.test(t) && t.trim().length>200; }
-function revisarFeedback(t){
+function revisarFeedback(t,res){
   const f=[], low=t.toLowerCase();
+  if(res==="ressalvas" && /n[aã]o\s+(vai\s+)?(entra|entrar|assume|assumir)\b[^.]*escala|fora da escala/i.test(t)) f.push('disse que a pessoa não entra na escala; no período de observação e treinamento ela já serve em algumas oportunidades indicadas pela coordenação, enquanto faz a turma de aperfeiçoamento');
   if(!terminou(t)) f.push('o texto está incompleto; escreva a mensagem inteira até o "Deus abençoe" e a assinatura');
   const achadas=PROIBIDAS.filter(w=>low.includes(w));
   if(/chamou\s+(muita\s+)?aten[cç][aã]o|ficou\s+marcad|ficaram\s+marcad|foi\s+notad|foram\s+notad/i.test(t)) f.push('usou expressão ambígua no elogio ("chamou atenção", "ficou marcado"); deixe claro que é um elogio, como "a gente gostou muito de..." ou "um dos seus pontos fortes é..."');
@@ -657,7 +658,7 @@ async function generateFeedback(id){
   const proximo = res==="aprovado"
     ? `APROVADO. Dê as boas-vindas ao GP Music e diga que a coordenação vai entrar em contato para integrar a pessoa aos ensaios e à escala. Mesmo aprovada, cite 1 ponto para continuar desenvolvendo, com uma sugestão prática.`
     : res==="ressalvas"
-    ? `EM OBSERVAÇÃO E TREINAMENTO. Explique que a pessoa ainda não entra na escala agora e passa por um período de treinamento e acompanhamento. Convide-a para a turma de aperfeiçoamento do ministério, focada nos pontos a desenvolver, e diga que ao final haverá uma nova avaliação. Deixe claro que o objetivo é prepará-la bem antes de assumir a escala.`
+    ? `EM OBSERVAÇÃO E TREINAMENTO. NÃO diga que a pessoa "não entra na escala" nem que ficou de fora. Explique que ela começa a servir de forma gradual e acompanhada: já pode participar de algumas oportunidades de serviço que a coordenação vai indicar, enquanto faz a turma de aperfeiçoamento do ministério, focada nos pontos de melhoria. Diga que ao final haverá uma nova avaliação. Não especifique quais cultos, reuniões ou funções; mantenha em termos gerais. Um bom modelo: "Nesse período, você já vai servir em algumas oportunidades que a coordenação vai combinar com você, e ao mesmo tempo participar da turma de aperfeiçoamento."`
     : `NÃO APROVADO. Diga com clareza e delicadeza que, nesta audição, a pessoa ainda não vai entrar na escala. Logo depois, inclua obrigatoriamente uma frase curta com a ideia de resguardo, no espírito de: "Essa decisão é para te resguardar: a gente prefere que você chegue à escala seguro e preparado." (sem sermão, sem repetir a ideia). Convide para a turma de aperfeiçoamento do ministério e diga que vocês vão planejar juntos a próxima audição.`;
   const prompt=`Você escreve em nome da liderança do GP Music, o ministério de louvor de uma igreja evangélica, que realizou uma audição para novos integrantes (vozes e instrumentistas). Escreva a mensagem de feedback individual que será enviada pelo WhatsApp ao candidato abaixo.
 
@@ -749,7 +750,7 @@ ${candSummary({...c,fortes:"",desenvolver:"",observacoes:""})}`;
   gen.disabled=true; const prev=ta.value; ta.value="Escrevendo o feedback…"; ta.disabled=true;
   try{
     let text=await gerarTexto(prompt);
-    const falhas=revisarFeedback(text);
+    const falhas=revisarFeedback(text,c.resultado);
     if(falhas.length){
       ta.value="Ajustando o texto…";
       try{
@@ -757,7 +758,7 @@ ${candSummary({...c,fortes:"",desenvolver:"",observacoes:""})}`;
         if(terminou(t2)||!terminou(text)) text=t2;
       }catch(_){ /* fica com a primeira versão */ }
       if(!terminou(text)) throw Object.assign(new Error("incompleto"),{code:"incompleto"});
-      const restantes=revisarFeedback(text);
+      const restantes=revisarFeedback(text,c.resultado);
       if(restantes.length) setTimeout(()=>toast("Revise antes de enviar: o texto ainda "+restantes.join("; ")+"."),400);
     }
     const cur=state.cands.get(id); if(!cur) return;
