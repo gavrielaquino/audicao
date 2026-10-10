@@ -626,6 +626,19 @@ function candSummary(c){
   return s;
 }
 
+const PROIBIDAS=["candidatura","precisamos ser honestos","coração aberto","porta continua aberta","você tem potencial","jornada","caminhada","chamado","conte conosco","de coração","bom gosto","bacana","se virou","tipo assim","aquele de beber","como é que fica","postura ministerial","linguagem musical","não conseguimos","desapontador","desapontadora","diafragma","drone","sovt"];
+function revisarFeedback(t){
+  const f=[], low=t.toLowerCase();
+  const achadas=PROIBIDAS.filter(w=>low.includes(w));
+  if(achadas.length) f.push(`usou expressões proibidas (${achadas.map(w=>'"'+w+'"').join(", ")})`);
+  if(!/\*[^*\n]+\*/.test(t)) f.push("não colocou em *negrito* a frase do resultado");
+  if(/—/.test(t)) f.push("usou travessão");
+  const n=t.trim().split(/\s+/).length;
+  if(n>185) f.push(`tem ${n} palavras, acima do limite de 170`);
+  if(/\b(agradecemos|reconhecemos|sugerimos|queremos|vimos|notamos|percebemos)\b/i.test(t)) f.push('misturou "nós" com "a gente"; use "a gente" do começo ao fim');
+  if(/\b(trabalhe|tente|faça|procure|estude)\b/i.test(t)) f.push('usou imperativo; escreva as sugestões como convite ("vale...", "uma boa prática é...")');
+  return f;
+}
 async function generateFeedback(id){
   const c=state.cands.get(id); if(!c) return;
   if((c.resultado||"pendente")==="pendente"){ toast("Defina o resultado antes de gerar o feedback."); return; }
@@ -718,7 +731,14 @@ ${candSummary({...c,fortes:"",desenvolver:"",observacoes:""})}`;
   if(!(c.fortes||"").trim()&&!(c.desenvolver||"").trim()&&!(c.observacoes||"").trim()) toast("Dica: preencha pontos fortes e o que desenvolver para o feedback ficar mais pessoal.");
   gen.disabled=true; const prev=ta.value; ta.value="Escrevendo o feedback…"; ta.disabled=true;
   try{
-    const text=await gerarTexto(prompt);
+    let text=await gerarTexto(prompt);
+    const falhas=revisarFeedback(text);
+    if(falhas.length){
+      ta.value="Ajustando o texto…";
+      try{
+        text=await gerarTexto(prompt+`\n\nVOCÊ JÁ ESCREVEU ESTA VERSÃO:\n${text}\n\nEla tem estes problemas: ${falhas.join("; ")}. Reescreva a mensagem corrigindo todos eles e mantendo o restante. Responda somente com o texto final.`);
+      }catch(_){ /* fica com a primeira versão */ }
+    }
     const cur=state.cands.get(id); if(!cur) return;
     cur.feedback=text.trim(); ta.value=cur.feedback; scheduleSave(id); refreshWa(cur);
     gen.textContent="Gerar de novo";
