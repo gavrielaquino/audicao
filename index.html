@@ -637,13 +637,15 @@ async function generateFeedback(id){
     ? `APROVADO. Dê as boas-vindas ao GP Music e diga que a coordenação vai entrar em contato para integrar a pessoa aos ensaios e à escala. Mesmo aprovada, cite 1 ponto para continuar desenvolvendo, com uma sugestão prática.`
     : res==="ressalvas"
     ? `EM OBSERVAÇÃO E TREINAMENTO. Explique que a pessoa ainda não entra na escala agora e passa por um período de treinamento e acompanhamento. Convide-a para a turma de aperfeiçoamento do ministério, focada nos pontos a desenvolver, e diga que ao final haverá uma nova avaliação. Deixe claro que o objetivo é prepará-la bem antes de assumir a escala.`
-    : `NÃO APROVADO. Explique com clareza e cuidado que, neste momento, a pessoa não entra no ministério, e que essa decisão existe para resguardá-la: assumir a escala antes de estar preparada pode expô-la e pesar sobre ela. Convide-a para a turma de aperfeiçoamento do ministério, dê sugestões de estudo pessoal e diga que vamos planejar juntos a próxima audição.`;
+    : `NÃO APROVADO. Diga com clareza e delicadeza que, nesta audição, a pessoa ainda não vai entrar na escala. Explique o motivo em UMA frase curta: a decisão é para resguardá-la, porque a gente prefere que ela chegue à escala segura e preparada (sem sermão, sem falar em "algo sério", sem repetir a ideia). Convide para a turma de aperfeiçoamento do ministério e diga que vocês vão planejar juntos a próxima audição.`;
   const prompt=`Você escreve em nome da liderança do GP Music, o ministério de louvor de uma igreja evangélica, que realizou uma audição para novos integrantes (vozes e instrumentistas). Escreva a mensagem de feedback individual que será enviada pelo WhatsApp ao candidato abaixo.
 
 FORMATO
 - Comece exatamente com: "Paz, ${firstName(c.nome)||"querido(a)"}!" em uma linha própria.
-- De 3 a 5 parágrafos curtos, entre 120 e 190 palavras no total. Texto corrido, sem títulos e sem listas. No máximo um emoji simples, e só se soar natural.
+- De 3 a 4 parágrafos curtos, entre 110 e 170 palavras no total. Respeite esse limite. Texto corrido, sem títulos e sem listas. No máximo um emoji simples, e só se soar natural.
+- Não use travessão (—). Use vírgula ou ponto.
 - Use *negrito* do WhatsApp uma única vez, na frase que comunica o resultado.
+- Antes do "Deus abençoe", no máximo uma frase curta de fechamento, concreta (por exemplo, colocando-se à disposição para tirar dúvidas). Nada de frases de efeito.
 - Encerre com "Deus abençoe," e, na linha de baixo, a assinatura: ${assin}
 
 FONTE PRINCIPAL: AS ANOTAÇÕES DOS COORDENADORES
@@ -656,27 +658,33 @@ As anotações da banca (pontos fortes, o que desenvolver e observações gerais
 
 CONTEÚDO, NESTA ORDEM
 1. Agradeça com carinho, em uma frase, pela disposição de servir no GP Music.
-2. Comunique o resultado logo em seguida, com clareza e delicadeza.
+2. Comunique o resultado logo em seguida, com clareza e delicadeza, falando do que acontece agora e não do que a banca "conseguiu" ou "não conseguiu". Bons modelos: "nesta audição, *você ainda não vai entrar na escala*"; "*você vai começar no período de observação e treinamento*"; "*você foi aprovado(a) para o GP Music*" (adapte o gênero só se o nome deixar claro; na dúvida, construa a frase sem marcar gênero).
 3. Valorize os pontos fortes que a banca anotou, de forma concreta e calorosa.
-4. Apresente os pontos de melhoria anotados pela banca como próximos passos de crescimento, nunca como defeitos. Para cada um, dê uma sugestão prática de estudo (veja o guia abaixo).
+4. Apresente no máximo 2 pontos de melhoria, os mais importantes anotados pela banca, como próximos passos de crescimento, nunca como defeitos. Para cada ponto, dê UMA sugestão prática, simples e explicada em palavras comuns (veja o guia abaixo). Não empilhe exercícios: menos sugestões, mais claras.
 5. Próximo passo, de acordo com o resultado: ${proximo}
 
 TOM E LINGUAGEM
 - Ameno, amigável e acolhedor, como um líder de louvor que conhece e gosta da pessoa e conversa com ela depois do culto. Trate por "você". A pessoa deve terminar a leitura se sentindo vista, respeitada e motivada.
 - Honesto, mas sempre gentil: prefira "ainda", "o próximo passo é", "vale investir em" a palavras como "falhou", "erro", "fraco", "problema" ou "precisa melhorar muito".
 - Frases curtas e naturais, como numa conversa de WhatsApp; nada de linguagem de relatório ou de empresa.
+- Fale como "a gente" do começo ao fim (a gente viu, a gente quer, a gente vai). Não misture com "nós", "reconhecemos", "sugerimos".
+- Não use pronomes oblíquos formais como "aprová-lo", "convidá-la", "prepará-lo". Prefira "convidar você", "te convidar".
+- Não suponha o que a pessoa está sentindo (nada de "sabemos que é difícil", "pode ser desapontador", "entendemos sua frustração").
+- Use os termos musicais corretamente e não crie combinações sem sentido (por exemplo, ritmo não é "afinado"; afinação não é "precisa"). Se uma anotação estiver ambígua, prefira omitir a interpretar.
+- Não repita a mesma ideia com outras palavras, e não diga a mesma coisa duas vezes (por exemplo, "postura" e "como você se portou").
+- Não use jargão técnico sem explicação (nada de "drone", "SOVT", "diafragma"; diga "nota de referência", "exercício com canudo", "apoio da respiração").
 - Seja específico sobre esta pessoa. Se uma frase serviria para qualquer candidato, corte.
-- Não use: "candidatura", "precisamos ser honestos", "coração aberto", "a porta continua aberta", "você tem potencial", "jornada", "chamado", nem elogios genéricos.
+- Não use: "candidatura", "precisamos ser honestos", "coração aberto", "a porta continua aberta", "você tem potencial", "jornada", "caminhada", "chamado", "conte conosco", "de coração", "bom gosto musical", nem elogios genéricos.
 - Não dramatize a notícia nem peça desculpas por ela.
 - Não cite notas numéricas, médias nem compare com outros candidatos.
 - Não comente a vida espiritual da pessoa nem faça promessas de vaga ou de datas.
 - Nunca invente fatos: só mencione comportamentos, músicas ou situações que estejam nos dados.
 
 GUIA DE SUGESTÕES PRÁTICAS (use só as que combinam com os pontos a desenvolver)
-- Afinação: cantar com afinador ou nota de referência (drone) tocando; gravar-se e ouvir comparando com o original.
+- Afinação: cantar com uma nota de referência tocando ao fundo (teclado ou aplicativo) ou com um afinador aberto; gravar-se cantando e ouvir junto com a versão original.
 - Ritmo e tempo: estudar e cantar/tocar com metrônomo, começando mais lento; tocar junto com as gravações originais.
 - Linguagem musical: ouvir atentamente as versões de referência do repertório da igreja, observando frases, dinâmicas e estilo; tirar músicas de ouvido.
-- Respiração e apoio: exercícios diários de sopro sustentado e de canudo (SOVT); trabalhar frases longas com controle de ar.
+- Respiração e apoio: alguns minutos por dia de exercício com canudo (cantar soprando por um canudo) e de sopro longo e constante; treinar frases longas sem perder o ar no final.
 - Extensão e projeção: vocalizes progressivos sem forçar; trabalhar ressonância e apoio antes de volume.
 - Dinâmica e interpretação: estudar a letra, marcar onde crescer e onde recolher; cantar pensando na mensagem.
 - Percepção e segunda voz: cantar intervalos e a segunda voz de músicas conhecidas junto com a gravação.
